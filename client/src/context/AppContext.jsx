@@ -18,10 +18,13 @@ export const AppContextProvider = ({ children }) => {
     const navigate = useNavigate();
 
     // Axios instance for API calls
-    const apiClient = axios.create({
-        baseURL: "http://localhost:4000", // Ensure this matches your backend URL
-        withCredentials: true, // Important for sending cookies like sellerToken
-    });
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000"; 
+       console.log("Frontend AppContext: API Base URL:", BACKEND_URL); // Debugging log to see the URL being used
+   
+       const apiClient = axios.create({
+           baseURL: BACKEND_URL, // Use the dynamic URL here
+           withCredentials: true,
+       });
 
     const fetchProducts = async () => {
         try {
