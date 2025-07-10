@@ -17,35 +17,49 @@ import { stripeWebhooks } from './controllers/orderController.js';
 // import './models/index.js';
 // --- END ENSURE ---
 
-const app=express();
-const port=process.env.PORT ||4000;
+const app = express();
+const port = process.env.PORT || 4000;
 
 // Call connectDB, which now handles Mongoose model registration
 await connectDB();
-await connectCloudinary()
+await connectCloudinary();
 
-const allowedOrigins=['http://localhost:5173','https://e-commerce-app-2rsc.vercel.app']
+// --- UPDATED: Add Capacitor origins to allowedOrigins ---
+const allowedOrigins = [
+    'http://localhost:5173',  // Your React development server
+    'https://e-commerce-app-2rsc.vercel.app', // Your deployed web frontend (if applicable)
+    'http://localhost',               // **Capacitor on Android (and some emulators)**
+    'capacitor://localhost'           // **Capacitor on iOS**
+];
+// --- END UPDATED ---
 
 // Stripe webhook must come *before* express.json() because it needs the raw body
-app.post("/stripe",express.raw({type:"application/json"}),stripeWebhooks)
+app.post("/stripe", express.raw({ type: "application/json" }), stripeWebhooks);
 
 app.use(express.json()); // Parses JSON bodies
 app.use(cookieParser()); // Parses cookies
-app.use(cors({origin:allowedOrigins,credentials:true})) // Configures CORS
 
+// --- UPDATED: Use the allowedOrigins array in CORS middleware ---
+// The `origin` option in cors can also be a function if you need more dynamic control,
+// but for a fixed list, passing the array is clean.
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+}));
+// --- END UPDATED ---
 
-app.get('/',(req,res)=>{
-   res.send("Api is working ...");
-})
+app.get('/', (req, res) => {
+    res.send("Api is working ...");
+});
 
 // API Routes
-app.use('/api/user',userRouter)
-app.use('/api/seller',sellerRouter)
-app.use('/api/product',productRouter)
-app.use('/api/cart',cartRouter)
-app.use('/api/address',addressRouter)
-app.use('/api/order',orderRouter)
+app.use('/api/user', userRouter);
+app.use('/api/seller', sellerRouter);
+app.use('/api/product', productRouter);
+app.use('/api/cart', cartRouter);
+app.use('/api/address', addressRouter);
+app.use('/api/order', orderRouter);
 
-app.listen(port,()=>{
-    console.log(`server is running on http://localhost:${port}`)
-})
+app.listen(port, () => {
+    console.log(`server is running on http://localhost:${port}`);
+});
